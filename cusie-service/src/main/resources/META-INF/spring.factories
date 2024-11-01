@@ -1,0 +1,5 @@
+# Auto Configure
+# Spring Boot ??????
+
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+top.cusie.service.ServiceAutoConfig
