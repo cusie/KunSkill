@@ -1,8 +1,9 @@
 package top.cusie.service.user.service;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import top.cusie.api.model.vo.PageParam;
-import top.cusie.service.user.repository.entity.UserRelationDO;
+import top.cusie.api.model.vo.user.UserRelationReq;
+import top.cusie.service.comment.dto.UserFollowListDTO;
+
 
 /**
  * 用户关系Service接口
@@ -13,22 +14,29 @@ import top.cusie.service.user.repository.entity.UserRelationDO;
 public interface UserRelationService {
 
     /**
-     * 获取关注用户列表
+     * 我关注的用户
+     *
      * @param userId
+     * @param pageParam
      * @return
      */
-    IPage<UserRelationDO> getUserRelationListByUserId(Integer userId, PageParam pageParam);
+    UserFollowListDTO getUserFollowList(Long userId, PageParam pageParam);
+
 
     /**
-     * 获取被关注用户列表
-     * @param followUserId
+     * 关注我的粉丝
+     *
+     * @param userId
+     * @param pageParam
      * @return
      */
-    IPage<UserRelationDO> getUserRelationListByFollowUserId(Integer followUserId, PageParam pageParam);
+    UserFollowListDTO getUserFansList(Long userId, PageParam pageParam);
+
 
     /**
-     * 删除用户关系
-     * @param id
+     * 保存用户关系
+     * @param req
+     * @throws Exception
      */
-    void deleteUserRelationById(Long id);
+    void saveUserRelation(UserRelationReq req) throws Exception;
 }

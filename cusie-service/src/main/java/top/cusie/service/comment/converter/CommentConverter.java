@@ -2,7 +2,7 @@ package top.cusie.service.comment.converter;
 
 
 import org.springframework.stereotype.Service;
-import top.cusie.api.model.vo.comment.CommentReq;
+import top.cusie.api.model.vo.comment.CommentSaveReq;
 import top.cusie.service.comment.repository.entity.CommentDO;
 import top.cusie.service.comment.dto.CommentTreeDTO;
 
@@ -14,10 +14,9 @@ import java.util.HashMap;
  * @author Cusie
  * @date 2024/10/31
  */
-@Service
 public class CommentConverter {
 
-    public CommentDO toDo(CommentReq req) {
+    public static CommentDO toDo(CommentSaveReq req) {
         if (req == null) {
             return null;
         }
@@ -30,7 +29,7 @@ public class CommentConverter {
         return commentDO;
     }
 
-    public CommentTreeDTO toDTO(CommentDO commentDO) {
+    public static CommentTreeDTO toDTO(CommentDO commentDO) {
         CommentTreeDTO commentTreeDTO = new CommentTreeDTO();
         commentTreeDTO.setUserId(commentDO.getUserId());
         commentTreeDTO.setCommentContent(commentDO.getContent());

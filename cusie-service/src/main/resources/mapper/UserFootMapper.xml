@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.cusie.service.user.repository.mapper.UserFootMapper">
+
+    <select id="queryCountByArticle"
+            resultType="top.cusie.service.user.dto.ArticleFootCountDTO">
+
+        SELECT
+            sum(if (praise_stat =${@top.cusie.api.model.enums.PraiseStatEnum@PRAISE.code}, 1, 0)) as praiseCount,
+            sum(if (read_stat =${@top.cusie.api.model.enums.ReadStatEnum@READ.code}, 1, 0)) as readCount,
+            sum(if (collection_stat =${@top.cusie.api.model.enums.CollectionStatEnum@COLLECTION.code}, 1, 0)) as collectionCount
+        FROM
+            user_foot
+        WHERE
+            doucument_type = ${@top.cusie.api.model.enums.DocumentTypeEnum@DOCUMENT.code}
+            AND doucument_id = #{articleId}
+
+    </select>
+
+
+    <select id="queryArticleFootCount"
+            resultType="top.cusie.service.user.dto.ArticleFootCountDTO">
+
+        SELECT
+            sum(if (praise_stat =${@top.cusie.api.model.enums.PraiseStatEnum@PRAISE.code}, 1, 0)) as praiseCount,
+            sum(if (read_stat =${@top.cusie.api.model.enums.ReadStatEnum@READ.code}, 1, 0)) as readCount,
+            sum(if (collection_stat =${@top.cusie.api.model.enums.CollectionStatEnum@COLLECTION.code}, 1, 0)) as collectionCount
+        FROM
+            user_foot
+        WHERE
+            doucument_type = ${@top.cusie.api.model.enums.DocumentTypeEnum@DOCUMENT.code}
+            AND doucument_user_id = #{userId}
+
+    </select>
+
+    <select id="queryCollectionArticleList"
+            resultType="top.cusie.service.article.repository.entity.ArticleDO">
+
+        SELECT
+            a.id as id,
+            a.user_id as userId,
+            a.article_type as articleType,
+            a.title as title,
+            a.short_title as shortTitle,
+            a.picture as picture,
+            a.summary as summary,
+            a.category_id as categoryId,
+            a.source as source,
+            a.source_url as sourceUrl,
+            a.status as status,
+            a.create_time as createTime,
+            a.update_time as updateTime
+        FROM user_foot as uf
+            left join article as a on a.id = uf.doucument_id
+        WHERE
+            uf.user_id = #{userId}
+            AND uf.doucument_type = ${@top.cusie.api.model.enums.DocumentTypeEnum@DOCUMENT.code}
+            AND uf.collection_stat = ${@top.cusie.api.model.enums.CollectionStatEnum@COLLECTION.code}
+            AND a.status = ${@top.cusie.api.model.enums.PushStatusEnum@ONLINE.code}
+            AND a.deleted = ${@top.cusie.api.model.enums.YesOrNoEnum@NO.code}
+        ORDER BY uf.id desc
+
+        <if test="pageParam != null">
+            limit #{pageParam.offset}, #{pageParam.limit}
+        </if>
+
+    </select>
+
+    <select id="queryReadArticleList"
+            resultType="top.cusie.service.article.repository.entity.ArticleDO">
+
+        SELECT
+            a.id as id,
+            a.user_id as userId,
+            a.article_type as articleType,
+            a.title as title,
+            a.short_title as shortTitle,
+            a.picture as picture,
+            a.summary as summary,
+            a.category_id as categoryId,
+            a.source as source,
+            a.source_url as sourceUrl,
+            a.status as status,
+            a.create_time as createTime,
+            a.update_time as updateTime
+        FROM user_foot as uf
+            left join article as a on a.id = uf.doucument_id
+        WHERE
+            uf.user_id = #{userId}
+            AND uf.doucument_type = ${@top.cusie.api.model.enums.DocumentTypeEnum@DOCUMENT.code}
+            AND uf.read_stat = ${@top.cusie.api.model.enums.ReadStatEnum@READ.code}
+            AND a.status = ${@top.cusie.api.model.enums.PushStatusEnum@ONLINE.code}
+            AND a.deleted = ${@top.cusie.api.model.enums.YesOrNoEnum@NO.code}
+        ORDER BY uf.id desc
+
+        <if test="pageParam != null">
+            limit #{pageParam.offset}, #{pageParam.limit}
+        </if>
+
+    </select>
+
+</mapper>

@@ -21,6 +21,7 @@ import com.google.common.cache.LoadingCache;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,6 +54,8 @@ public class CategoryServiceImpl implements CategoryService {
                 return new CategoryDTO(categoryId, category.getCategoryName());
             }
         });
+        // 预热全量缓存
+        loadAllCategories(true);
     }
 
     /**
@@ -116,14 +119,21 @@ public class CategoryServiceImpl implements CategoryService {
      * @return
      */
     public List<CategoryDTO> loadAllCategories(boolean forceDB) {
-        if (forceDB || categoryCaches == null) {
+        if (forceDB) {
             List<CategoryDTO> list = loadAllCategoriesFromDb();
             categoryCaches.invalidateAll();
             categoryCaches.cleanUp();
             list.forEach(s -> categoryCaches.put(s.getCategoryId(), s));
             return list;
         } else {
-            return new ArrayList<>(categoryCaches.asMap().values());
+            List<CategoryDTO> list = new ArrayList<>(categoryCaches.asMap().values());
+            list.sort(new Comparator<CategoryDTO>() {
+                @Override
+                public int compare(CategoryDTO o1, CategoryDTO o2) {
+                    return Long.compare(o1.getCategoryId(), o2.getCategoryId());
+                }
+            });
+            return list;
         }
     }
 

@@ -15,6 +15,7 @@ import top.cusie.api.model.entity.BaseDO;
 @EqualsAndHashCode(callSuper = true)
 @TableName("comment")
 public class CommentDO extends BaseDO {
+
     private static final long serialVersionUID = 1L;
 
     /**

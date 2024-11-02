@@ -1,16 +1,18 @@
 package top.cusie.test.dao;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import top.cusie.api.model.vo.PageParam;
-import top.cusie.service.article.dto.TagDTO;
-import top.cusie.service.article.repository.entity.CategoryDO;
-import top.cusie.service.article.repository.entity.TagDO;
-import top.cusie.service.article.service.impl.CategoryServiceImpl;
-import top.cusie.service.article.service.impl.TagServiceImpl;
-import top.cusie.test.BasicTest;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import top.cusie.api.model.vo.PageParam;
+import top.cusie.service.article.dto.ArticleListDTO;
+import top.cusie.service.article.dto.TagDTO;
+import top.cusie.service.article.repository.entity.CategoryDO;
+import top.cusie.service.article.repository.entity.TagDO;
+import top.cusie.service.article.service.impl.ArticleServiceImpl;
+import top.cusie.service.article.service.impl.CategoryServiceImpl;
+import top.cusie.service.article.service.impl.TagServiceImpl;
+import top.cusie.test.BasicTest;
 
 import java.util.List;
 
@@ -20,11 +22,15 @@ import java.util.List;
  */
 @Slf4j
 public class ArticleDaoTest extends BasicTest {
+
     @Autowired
     private TagServiceImpl tagService;
 
     @Autowired
     private CategoryServiceImpl categoryService;
+
+    @Autowired
+    private ArticleServiceImpl articleService;
 
     @Test
     public void testCategory() {
@@ -42,7 +48,7 @@ public class ArticleDaoTest extends BasicTest {
     @Test
     public void testTag() {
         TagDO tag = new TagDO();
-        tag.setTagName("Java");
+        tag.setTagName("Javax");
         tag.setTagType(1);
         tag.setCategoryId(1L);
         Long tagId = tagService.addTag(tag);
@@ -54,6 +60,8 @@ public class ArticleDaoTest extends BasicTest {
 
     @Test
     public void testArticle() {
-
+        ArticleListDTO articleListDTO = articleService.getCollectionArticleListByUserId(1L, PageParam.newPageInstance(1L, 10L));
+        log.info("articleListDTO: {}", articleListDTO);
     }
+
 }

@@ -18,8 +18,6 @@ public class UserRelationDO extends BaseDO {
 
     private static final long serialVersionUID = 1L;
 
-    private Long id;
-
     /**
      * 用户ID
      */
@@ -30,5 +28,8 @@ public class UserRelationDO extends BaseDO {
      */
     private Long followUserId;
 
-    private Integer deleted;
+    /**
+     * 关注状态: 0-未关注，1-已关注，2-取消关注
+     */
+    private Integer followState;
 }

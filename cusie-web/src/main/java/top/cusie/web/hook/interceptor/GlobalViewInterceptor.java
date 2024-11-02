@@ -16,6 +16,9 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * 注入全局的配置信息：
+ * - thymleaf 站点信息，基本信息，在这里注入
+ *
  * @author Cusie
  * @date 2024/10/31
  */

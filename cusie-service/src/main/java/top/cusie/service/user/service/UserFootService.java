@@ -1,9 +1,14 @@
 package top.cusie.service.user.service;
 
 
-import top.cusie.api.model.enums.CollectionStatEnum;
-import top.cusie.api.model.enums.CommentStatEnum;
-import top.cusie.api.model.enums.PraiseStatEnum;
+import top.cusie.api.model.enums.OperateTypeEnum;
+import top.cusie.api.model.vo.PageParam;
+import top.cusie.api.model.vo.comment.CommentSaveReq;
+import top.cusie.service.article.repository.entity.ArticleDO;
+import top.cusie.service.comment.repository.entity.CommentDO;
+import top.cusie.service.user.dto.ArticleFootCountDTO;
+
+import java.util.List;
 
 /**
  * 用户足迹Service接口
@@ -14,58 +19,71 @@ import top.cusie.api.model.enums.PraiseStatEnum;
 public interface UserFootService {
 
     /**
-     * 文章收藏数
-     *
-     * @param documentId
+     * 保存文章计数
+     * @param articleId
+     * @param userId
+     * @param operateTypeEnum
      * @return
      */
-    Integer queryCollentionCount(Long documentId);
+    ArticleFootCountDTO saveArticleFoot(Long articleId, Long userId, OperateTypeEnum operateTypeEnum);
 
     /**
-     * 文章阅读数
+     * 根据文章ID查询文章计数
      *
-     * @param documentId
+     * @param articleId
      * @return
      */
-    Integer queryReadCount(Long documentId);
+    ArticleFootCountDTO queryArticleCountByArticleId(Long articleId);
+
 
     /**
-     * 文章评论数
+     * 根据用户ID查询文章计数
      *
-     * @param documentId
-     * @return
-     */
-    Integer queryCommentCount(Long documentId);
-
-    /**
-     * 文章点赞数
-     *
-     * @param documentId
-     * @return
-     */
-    Integer queryPraiseCount(Long documentId);
-
-    /**
-     * 收藏/取消收藏足迹
-     * @param documentId
      * @param userId
      * @return
      */
-    Integer operateCollectionFoot(Long documentId, Long userId, CollectionStatEnum statEnum);
+    ArticleFootCountDTO queryArticleCountByUserId(Long userId);
 
     /**
-     * 评论/删除评论足迹
-     * @param documentId
-     * @param userId
+     * 获取评论点赞数量
+     *
+     * @param commentId
      * @return
      */
-    Integer operateCommentFoot(Long documentId, Long userId, CommentStatEnum statEnum);
+    Long queryCommentPraiseCount(Long commentId);
 
     /**
-     * 点赞/取消点赞足迹
-     * @param documentId
+     * 查询已读文章列表
+     *
      * @param userId
+     * @param pageParam
      * @return
      */
-    Integer operatePraiseFoot(Long documentId, Long userId, PraiseStatEnum statEnum);
+    List<ArticleDO> queryReadArticleList(Long userId, PageParam pageParam);
+
+    /**
+     * 查询收藏文章列表
+     *
+     * @param userId
+     * @param pageParam
+     * @return
+     */
+    List<ArticleDO> queryCollectionArticleList(Long userId, PageParam pageParam);
+
+    /**
+     * 保存评论足迹
+     *
+     * @param commentSaveReq  保存评论入参
+     * @param commentId  评论ID
+     * @param articleUserId  发版文章的用户ID
+     */
+    void saveCommentFoot(CommentSaveReq commentSaveReq, Long commentId, Long articleUserId);
+
+    /**
+     * 删除评论足迹
+     *
+     * @param commentDO
+     * @throws Exception
+     */
+    void deleteCommentFoot(CommentDO commentDO) throws Exception;
 }

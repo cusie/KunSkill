@@ -1,7 +1,9 @@
 package top.cusie.service.user.service;
 
 
-import top.cusie.service.user.repository.entity.UserDO;
+import top.cusie.api.model.vo.user.UserInfoSaveReq;
+import top.cusie.api.model.vo.user.UserSaveReq;
+import top.cusie.service.user.dto.UserHomeDTO;
 import top.cusie.service.user.repository.entity.UserInfoDO;
 
 /**
@@ -13,33 +15,31 @@ import top.cusie.service.user.repository.entity.UserInfoDO;
 public interface UserService {
 
     /**
-     * 更新用户
-     * @param userDTO
+     * 保存用户
+     * @param req
+     * @throws Exception
      */
-    void updateUser(UserDO userDTO);
+    void saveUser(UserSaveReq req);
 
     /**
-     * 删除用户
-     * @param userInfoId
+     * 保存用户详情
+     * @param req
      */
-    void deleteUser(Long userInfoId);
+    void saveUserInfo(UserInfoSaveReq req);
 
     /**
-     * 更新用户信息
-     * @param userInfoDTO
-     */
-    void updateUserInfo(UserInfoDO userInfoDTO);
-
-    /**
-     * 删除用户信息
-     * @param userId
-     */
-    void deleteUserInfo(Long userId);
-
-    /**
-     * 查询用户信息
+     * 查询用户详情信息
      * @param userId
      * @return
      */
     UserInfoDO getUserInfoByUserId(Long userId);
+
+
+    /**
+     * 查询用户主页信息
+     * @param userId
+     * @return
+     * @throws Exception
+     */
+    UserHomeDTO getUserHomeDTO(Long userId);
 }

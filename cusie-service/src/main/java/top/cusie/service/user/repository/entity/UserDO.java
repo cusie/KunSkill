@@ -18,8 +18,6 @@ public class UserDO extends BaseDO {
 
     private static final long serialVersionUID = 1L;
 
-    private Long id;
-
     /**
      * 第三方用户ID
      */

@@ -1,7 +1,7 @@
 package top.cusie.service.comment.service;
 
 import top.cusie.api.model.vo.PageParam;
-import top.cusie.api.model.vo.comment.CommentReq;
+import top.cusie.api.model.vo.comment.CommentSaveReq;
 import top.cusie.service.comment.dto.CommentTreeDTO;
 
 import java.util.Map;
@@ -26,10 +26,10 @@ public interface CommentService {
     /**
      * 更新/保存评论
      *
-     * @param commentReq
+     * @param commentSaveReq
      * @throws Exception
      */
-    void saveComment(CommentReq commentReq) throws Exception;
+    Long saveComment(CommentSaveReq commentSaveReq) throws Exception;
 
     /**
      * 删除评论

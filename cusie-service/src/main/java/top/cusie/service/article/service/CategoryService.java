@@ -3,7 +3,10 @@ package top.cusie.service.article.service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import top.cusie.api.model.enums.PushStatusEnum;
 import top.cusie.api.model.vo.PageParam;
+import top.cusie.service.article.dto.CategoryDTO;
 import top.cusie.service.article.repository.entity.CategoryDO;
+
+import java.util.List;
 
 /**
  * @author Cusie
@@ -17,6 +20,15 @@ public interface CategoryService {
      * @return
      */
     String getCategoryName(Long categoryId);
+
+
+    /**
+     * 查询所有的分离
+     *
+     * @param forceDB
+     * @return
+     */
+    List<CategoryDTO> loadAllCategories(boolean forceDB);
 
     /**
      * 添加类目

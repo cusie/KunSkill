@@ -1,13 +1,15 @@
 package top.cusie.service.article.repository;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import top.cusie.api.model.enums.SourceTypeEnum;
+import top.cusie.api.model.enums.PushStatusEnum;
 import top.cusie.api.model.enums.YesOrNoEnum;
+import top.cusie.api.model.vo.PageParam;
+import top.cusie.service.article.conveter.ArticleConverter;
 import top.cusie.service.article.dto.ArticleDTO;
-import top.cusie.service.article.dto.CategoryDTO;
 import top.cusie.service.article.dto.TagDTO;
 import top.cusie.service.article.repository.entity.ArticleDO;
 import top.cusie.service.article.repository.entity.ArticleDetailDO;
@@ -18,11 +20,14 @@ import top.cusie.service.article.repository.mapper.ArticleTagMapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
  * 文章相关DB操作
+ * <p>
+ * 多表结构的操作封装，只与DB操作相关
  *
  * @author Cusie
  * @date 2024/10/31
@@ -42,6 +47,7 @@ public class ArticleRepositoryImpl implements ArticleRepository {
      * @param articleId
      * @return
      */
+    @Override
     public ArticleDTO queryArticleDetail(Long articleId) {
         // 查询文章记录
         ArticleDO article = articleMapper.selectById(articleId);
@@ -54,20 +60,8 @@ public class ArticleRepositoryImpl implements ArticleRepository {
         ArticleDetailDO detail = findLatestDetail(articleId);
         List<ArticleTagDO> tagList = findArticleTags(articleId);
 
-        ArticleDTO dto = new ArticleDTO();
-        dto.setAuthor(article.getUserId());
-        dto.setArticleId(articleId);
-        dto.setTitle(article.getTitle());
-        dto.setShortTitle(article.getShortTitle());
-        dto.setSummary(article.getSummary());
-        dto.setCover(article.getPicture());
-        dto.setSourceType(SourceTypeEnum.formCode(article.getSource()).getDesc());
-        dto.setSourceUrl(article.getSourceUrl());
-        dto.setStatus(article.getStatus());
-        dto.setLastUpdateTime(article.getUpdateTime().getTime());
+        ArticleDTO dto= ArticleConverter.toDTO(article);
         dto.setContent(detail.getContent());
-        // 设置类目id
-        dto.setCategory(new CategoryDTO(article.getCategoryId(), null));
         // 设置标签列表
         dto.setTags(tagList.stream().map(s -> new TagDTO(s.getTagId())).collect(Collectors.toList()));
         return dto;
@@ -88,7 +82,7 @@ public class ArticleRepositoryImpl implements ArticleRepository {
                 .eq(ArticleTagDO::getDeleted, YesOrNoEnum.NO.getCode()));
     }
 
-
+    @Override
     public Long saveArticle(ArticleDO article, String content, Set<Long> tags) {
         if (article.getId() != null) {
             updateArticle(article, content, tags);
@@ -132,6 +126,7 @@ public class ArticleRepositoryImpl implements ArticleRepository {
     }
 
     private void insertArticle(ArticleDO article, String content, Set<Long> tags) {
+        // article + article_detail + tag  三张表的数据变更
         articleMapper.insert(article);
         Long articleId = article.getId();
 
@@ -154,6 +149,44 @@ public class ArticleRepositoryImpl implements ArticleRepository {
             insertList.add(tag);
         });
         articleTagMapper.batchInsert(insertList);
+    }
+
+    @Override
+    public List<ArticleDO> getArticleListByUserId(Long userId, PageParam pageParam) {
+        LambdaQueryWrapper<ArticleDO> query = Wrappers.lambdaQuery();
+        query.eq(ArticleDO::getDeleted, YesOrNoEnum.NO.getCode())
+                .eq(ArticleDO::getStatus, PushStatusEnum.ONLINE.getCode())
+                .eq(ArticleDO::getUserId, userId)
+                .last(PageParam.getLimitSql(pageParam))
+                .orderByDesc(ArticleDO::getId);
+        return articleMapper.selectList(query);
+    }
+
+    @Override
+    public List<ArticleDO> getArticleListByCategoryId(Long categoryId, PageParam pageParam) {
+        LambdaQueryWrapper<ArticleDO> query = Wrappers.lambdaQuery();
+        query.eq(ArticleDO::getDeleted, YesOrNoEnum.NO.getCode())
+                .eq(ArticleDO::getStatus, PushStatusEnum.ONLINE.getCode());
+        Optional.ofNullable(categoryId).ifPresent(cid -> query.eq(ArticleDO::getCategoryId, cid));
+        query.last(PageParam.getLimitSql(pageParam))
+                .orderByDesc(ArticleDO::getId);
+        return articleMapper.selectList(query);
+    }
+
+    @Override
+    public List<ArticleDO> getArticleListByBySearchKey(String key, PageParam pageParam) {
+        LambdaQueryWrapper<ArticleDO> query = Wrappers.lambdaQuery();
+        query.eq(ArticleDO::getDeleted, YesOrNoEnum.NO.getCode())
+                .eq(ArticleDO::getStatus, PushStatusEnum.ONLINE.getCode())
+                .and(!StringUtils.isEmpty(key),
+                        v -> v.like(ArticleDO::getTitle, key)
+                                .or()
+                                .like(ArticleDO::getShortTitle, key)
+                                .or()
+                                .like(ArticleDO::getSummary, key));
+        query.last(PageParam.getLimitSql(pageParam))
+                .orderByDesc(ArticleDO::getId);
+        return articleMapper.selectList(query);
     }
 
 }
