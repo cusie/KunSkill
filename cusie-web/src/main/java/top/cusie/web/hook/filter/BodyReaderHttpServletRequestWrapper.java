@@ -28,27 +28,16 @@ import java.util.List;
  * 该包装类主要用于多次读取请求体或以非标准方式访问请求体。
  */
 public class BodyReaderHttpServletRequestWrapper extends HttpServletRequestWrapper {
-    // HTTP 方法列表，这些方法可能包含请求体
     private static final List<String> POST_METHOD = Arrays.asList("POST", "PUT");
-    // 日志记录器，用于记录日志信息
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    // 存储的请求体，字节数组格式
     private final byte[] body;
-    // 存储的请求体，字符串格式
     private final String bodyString;
 
-    /**
-     * 构造 BodyReaderHttpServletRequestWrapper 实例。
-     * 如果请求满足某些条件，则读取并存储请求体。
-     *
-     * @param request 原始的 HttpServletRequest 对象
-     */
     public BodyReaderHttpServletRequestWrapper(HttpServletRequest request) {
         super(request);
 
         if (POST_METHOD.contains(request.getMethod()) && !isMultipart(request) && !isBinaryContent(request)) {
-            // 读取请求体并转换为字符串
             bodyString = getBodyString(request);
             body = bodyString.getBytes(StandardCharsets.UTF_8);
         } else {
@@ -57,22 +46,11 @@ public class BodyReaderHttpServletRequestWrapper extends HttpServletRequestWrapp
         }
     }
 
-    /**
-     * 获取请求体的 BufferedReader。
-     *
-     * @return BufferedReader 对象
-     * @throws IOException 如果发生 I/O 错误
-     */
+    @Override
     public BufferedReader getReader() throws IOException {
         return new BufferedReader(new InputStreamReader(getInputStream()));
     }
 
-    /**
-     * 获取请求体的 InputStream。
-     *
-     * @return ServletInputStream 对象
-     * @throws IOException 如果发生 I/O 错误
-     */
     @Override
     public ServletInputStream getInputStream() throws IOException {
         if (body == null) {
@@ -102,36 +80,20 @@ public class BodyReaderHttpServletRequestWrapper extends HttpServletRequestWrapp
         };
     }
 
-    /**
-     * 检查请求是否包含有效负载。
-     *
-     * @return 如果请求体不为空则返回 true，否则返回 false
-     */
     public boolean hasPayload() {
         return bodyString != null;
     }
 
-    /**
-     * 获取请求体的字符串表示。
-     *
-     * @return 请求体的字符串表示
-     */
     public String getBodyString() {
         return bodyString;
     }
 
-    /**
-     * 从 HttpServletRequest 中读取请求体并返回字符串表示。
-     *
-     * @param request 原始的 HttpServletRequest 对象
-     * @return 请求体的字符串表示
-     */
     private String getBodyString(HttpServletRequest request) {
         BufferedReader br;
         try {
             br = request.getReader();
         } catch (IOException e) {
-            logger.warn("获取 Reader 失败", e);
+            logger.warn("Failed to get reader", e);
             return "";
         }
 
@@ -142,23 +104,23 @@ public class BodyReaderHttpServletRequestWrapper extends HttpServletRequestWrapp
                 body.append(str);
             }
         } catch (IOException e) {
-            logger.warn("读取行失败", e);
+            logger.warn("Failed to read line", e);
         }
 
         try {
             br.close();
         } catch (IOException e) {
-            logger.warn("关闭 Reader 失败", e);
+            logger.warn("Failed to close reader", e);
         }
 
         return body.toString();
     }
 
     /**
-     * 检查请求内容是否为二进制内容。
+     * is binary content
      *
-     * @param request 原始的 HttpServletRequest 对象
-     * @return 如果请求内容类型为 image、video 或 audio，则返回 true，否则返回 false
+     * @param request http request
+     * @return ret
      */
     private boolean isBinaryContent(final HttpServletRequest request) {
         return request.getContentType() != null &&
@@ -167,10 +129,10 @@ public class BodyReaderHttpServletRequestWrapper extends HttpServletRequestWrapp
     }
 
     /**
-     * 检查请求内容是否为多部分表单数据。
+     * is multipart content
      *
-     * @param request 原始的 HttpServletRequest 对象
-     * @return 如果请求内容类型为 multipart/form-data，则返回 true，否则返回 false
+     * @param request http request
+     * @return ret
      */
     private boolean isMultipart(final HttpServletRequest request) {
         return request.getContentType() != null && request.getContentType().startsWith("multipart/form-data");

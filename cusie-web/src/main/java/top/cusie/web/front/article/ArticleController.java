@@ -65,7 +65,7 @@ public class ArticleController {
             model.addAttribute("tags", Collections.emptyList());
         }
 
-        return "biz/article/edit";
+        return "/article/edit";
     }
 
     /**
@@ -102,7 +102,7 @@ public class ArticleController {
         // 作者信息
         UserHomeDTO user = userService.getUserHomeDTO(articleDTO.getAuthor());
         model.addAttribute("author", user);
-        return "biz/article/detail";
+        return "/article/detail";
     }
 
     /**

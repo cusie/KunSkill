@@ -7,13 +7,15 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
+import top.cusie.api.model.context.ReqInfoContext;
+import top.cusie.service.user.dto.UserHomeDTO;
+import top.cusie.service.user.service.UserService;
 import top.cusie.web.config.GlobalViewConfig;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * 注入全局的配置信息：
@@ -25,17 +27,14 @@ import java.util.List;
 
 @Slf4j
 @Component
-/**
- * 全局视图拦截器，用于在请求处理前后执行自定义逻辑
- * 主要功能包括向模型中添加全局视图数据，如站点信息、用户登录状态和用户信息等
- */
 public class GlobalViewInterceptor implements AsyncHandlerInterceptor {
     @Resource
     private GlobalViewConfig globalViewConfig;
+    @Resource
+    private UserService userService;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        // 预处理请求，返回true表示请求继续执行
         return true;
     }
 
@@ -43,33 +42,26 @@ public class GlobalViewInterceptor implements AsyncHandlerInterceptor {
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
         // 重定向请求不需要添加
         if (!ObjectUtils.isEmpty(modelAndView)) {
-            // 向模型中添加全局视图数据
             modelAndView.getModel().put("siteInfo", globalViewConfig);
-            modelAndView.getModel().put("isLogin", true);
-            // 构建用户信息并添加到模型中
-            UserInfo userInfo = new UserInfo().setUid(1L).setUname("cusie")
-                    .setAvatar("https://jsd.onmicrosoft.cn/gh/cusie/image/unnamed.jpg")
-                    .setNewMsgList(Arrays.asList(new UserMsg().setMsgId(100L).setMsgType(1).setMsg("模拟通知消息")));
-            modelAndView.getModel().put("user", userInfo);
+            Long userId = ReqInfoContext.getReqInfo().getUserId();
+            if (userId == null) {
+                return;
+            }
+
+            // 用户信息
+            UserHomeDTO user = userService.getUserHomeDTO(userId);
+            if (user != null) {
+                modelAndView.getModel().put("isLogin", true);
+                modelAndView.getModel().put("user", user);
+            } else {
+                modelAndView.getModel().put("isLogin", false);
+            }
+
+            // 消息数 fixme 消息信息改由消息模块处理
+            modelAndView.getModel().put("msgs", Arrays.asList(new UserMsg().setMsgId(100L).setMsgType(1).setMsg("模拟通知消息")));
         }
     }
 
-    /**
-     * 用户信息类，包含用户的基本信息和新消息列表
-     */
-    @Data
-    @Accessors(chain = true)
-    private static class UserInfo {
-        private Long uid;
-        private String uname;
-        private String avatar;
-        private String role;
-        private List<UserMsg> newMsgList;
-    }
-
-    /**
-     * 用户消息类，表示用户接收到的消息
-     */
     @Data
     @Accessors(chain = true)
     private static class UserMsg {

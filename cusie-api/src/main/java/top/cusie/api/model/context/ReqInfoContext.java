@@ -8,6 +8,7 @@ import lombok.Data;
  * @date 2024/10/30
  */
 public class ReqInfoContext {
+
     /**
      * fixme 注意，下面这种方式导致在子线程中拿不到用户信息
      */
@@ -67,5 +68,4 @@ public class ReqInfoContext {
          */
         private Long userId;
     }
-
 }
